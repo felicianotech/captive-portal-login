@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+LOGFILE="/var/log/captive-portal-login"
+
+SNAPINSTALL=%%FALSE%%
+
+# The if block is a workaround until snapd gets an uninstall/remove hook
+if [[ $SNAPINSTALL == "true" ]]; then
+	if ! snap list | grep -q "captive-portal-login"; then
+		rm /etc/NetworkManager/dispatcher.d/captive-portal-login
+	fi
+fi
+
+# This script only cares if a wireless network is going up. Otherwise, let's just bail.
+if [[ "$2" != "up" ]] || [[ "$1" != wl* ]]; then
+	exit
+fi
+
+# Try reaching out to our known location over the Internet
+RESPONSE=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' http://ping.feliciano.tech)
+
+# Convert our response in an array
+RESPONSE=($RESPONSE)
+
+# If the HTTP code is a redirect, then we need to follow it in a browser window
+if [[ ${RESPONSE[0]} == 301 ]] || [[ ${RESPONSE[0]} == 302 ]]; then
+	XUSER=$(who -u | grep "(:0)" | cut -f 1 -d " ")
+	
+	# This helps us make sure the desktop is loaded before continuing
+	while [ -z "$(/usr/bin/pgrep "nm-applet")" ]; do
+		sleep 3;
+	done
+
+	DISPLAY=:0 su - $XUSER --shell /bin/bash --command "firefox -private-window ${RESPONSE[1]}"
+fi

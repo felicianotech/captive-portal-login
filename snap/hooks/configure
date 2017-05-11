@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+chown root:root $SNAP/captive-portal-login
+cp $SNAP/captive-portal-login  /etc/NetworkManager/dispatcher.d/
+
+sed -i -e 's!%%FALSE%%!'"true"'!g' "/etc/NetworkManager/dispatcher.d/captive-portal-login"

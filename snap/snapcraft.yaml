@@ -1,0 +1,16 @@
+name: captive-portal-login
+version: "0.1.0"
+summary: "Opens a browser window to log in to captive portals."
+description: |
+  The program will check for Internet connectivity when connection to a Wi-Fi 
+  access point. When a captive portal is detected (think Starbucks WiFi, 
+  McDonald's WiFi), a new browser window is opened with the login page.
+#icon: "icon.svg"
+
+grade: stable
+confinement: classic
+
+parts:
+  captive-portal-login:
+    plugin: dump
+    source: src/
